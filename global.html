@@ -5,11 +5,12 @@
     <title>Sina WeiBo Button</title>
     <!--导入jquery-->
     <script src="jquery-1.6.2.min.js"></script>
+    <script src="oauth.js"></script>
+	<script src="sha1.js"></script>
 <script>
 safari.application.addEventListener("command", launchSinaWeiBo, false);
-//safari.application.addEventListener("message",respondToMessage,false);
-safari.application.addEventListener("validate", loadPrefs, false);
-//safari.application.addEventListener("validate", validateCommand, false);
+//safari.application.addEventListener("validate", loadPrefs, false);
+
 
 var appId="3192287051";
 
@@ -20,6 +21,7 @@ var lastCheck;		//最后一次检测的时间
 
 function launchSinaWeiBo(event)
 {
+	oauthValidate();
 	 var reload = false;
 	 
 	 if (safari.extension.toolbarItems[0].image == safari.extension.baseURI+"error.png") {
@@ -135,19 +137,65 @@ function getUnreadCount()
 	});*/
 }
 
-
-function validateCommand(event)
+function oauthValidate()
 {
-	// You should always check the command.
-	if (event.command != "weiboButtonAction")
-		return;
 
-	// Disable the target if there are fewer than 2 tabs in the target's window.
-	var url= event.target.browserWindow.activeTab.url;
-	if(url==null){
-		event.target.disabled =true;
-	}
+	var oauth_consumer_key="3192287051";
+	var app_secret ="4346503e1d8ff6ff21288ee2848a5b24";
+	var oauth_nonce=nonce(43);		//获取随机数
+	var oauth_timestamp=timestamp();
+	var oauth_signature_method="HMAC-SHA1";
+	var oauth_version="1.0";
+	var request_token_api="http://api.t.sina.com.cn/oauth/request_token";
+	var oauth_method="GET";
+	
+	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
+                    "oauth_nonce=" + oauth_nonce,
+                    "oauth_signature_method=" + oauth_signature_method,
+                    "oauth_timestamp=" + oauth_timestamp,
+                    "oauth_version=" + oauth_version];
+    var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
+    var oauth_signature = b64_hmac_sha1(app_secret + "&", base_string) + "=";
+        
+     var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
+                   + "&oauth_nonce=" + encodeURIComponent(oauth_nonce)
+                   + "&oauth_timestamp=" + encodeURIComponent(oauth_timestamp)
+                   + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
+                   + "&oauth_signature=" + encodeURIComponent(oauth_signature)
+                   + "&oauth_version=" + encodeURIComponent(oauth_version);
+ 	
+	$.get('http://api.t.sina.com.cn/oauth/request_token?'+args, function(data) {
+			var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
+		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
+	}).error(function(data) { alert("error:"+data.responseText); });
 }
+
+/*解析GET变量形式的值*/
+function getParameter( val ,data) {
+	var re = new RegExp (val + "=([^&#]*)","i")
+	var a = re.exec(data)
+	if ( a == null )
+		return null;
+	return decodeURI(a[1]);
+};
+
+/*随机生成字符串*/
+function nonce(length) {
+        var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+        var result = "";
+        for (var i = 0; i < length; ++i) {
+            var rnum = Math.floor(Math.random() * chars.length);
+            result += chars.substring(rnum, rnum+1);
+        }
+        return result;
+}
+
+/*获取时间戳*/
+function timestamp() {
+        var t = (new Date()).getTime() ;
+        return Math.floor(t / 1000);
+}
+
 </script>
  </head>
 
