@@ -46,6 +46,10 @@
 			<array>
 				<string>jquery-1.6.2.min.js</string>
 			</array>
+			<key>Start</key>
+			<array>
+				<string>jquery-1.6.2.min.js</string>
+			</array>
 		</dict>
 		<key>Stylesheets</key>
 		<array>

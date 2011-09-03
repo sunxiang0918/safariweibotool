@@ -7,7 +7,7 @@
     <script src="jquery-1.6.2.min.js"></script>
 <script>
 safari.application.addEventListener("command", launchSinaWeiBo, false);
-safari.application.addEventListener("message",respondToMessage,false);
+//safari.application.addEventListener("message",respondToMessage,false);
 safari.application.addEventListener("validate", loadPrefs, false);
 //safari.application.addEventListener("validate", validateCommand, false);
 
@@ -76,7 +76,7 @@ function getUnreadCount(){
 
 function loadPrefs()
 {
-    includedItems = safari.extension.settings.getItem("includedItems");		//获取数量的种类,
+    //includedItems = safari.extension.settings.getItem("includedItems");		//获取数量的种类,
     var checkInterval = safari.extension.settings.getItem("checkInterval");		//查询的间隔时间
 
     if (checkInterval != -1) {
@@ -108,6 +108,7 @@ function setRefresh(minutes) {
 /*读取未读的数量*/
 function getUnreadCount()
 {
+	/*
     $.ajax({
 		url: "http://api.t.sina.com.cn/statuses/unread.json",
 		data:{ source: appId},
@@ -115,13 +116,23 @@ function getUnreadCount()
 		success: function(data, textStatus){
 			alert(data);
 		},
-		complete: function(XMLHttpRequest, textStatus){
-			alert("in complete");
-		},
-		error: function(){
-			alert("in error");
+		error: function(XMLHttpRequest, textStatus){
+			
+				// 错误,通常是因为没有登陆
+                unread = 0;
+                var buttons = safari.extension.toolbarItems;
+                for (var i=0; i<buttons.length; i++) {
+                    buttons[i].badge = 0;
+                    buttons[i].image = safari.extension.baseURI+"error.png";
+                    buttons[i].toolTip = "获取微博数目错误,有可能是没有登陆造成的,单击按钮登陆";
+                }
+			
+			//alert("in error");
+			//alert(XMLHttpRequest.readyState);
+			//alert(XMLHttpRequest.status);			//错误代码
+			alert(XMLHttpRequest.responseText);		//JSON格式的错误信息 比如 {"request":"/statuses/unread.json","error_code":"403","error":"40302:Error: auth faild!"}
 		}
-	});
+	});*/
 }
 
 
@@ -139,4 +150,5 @@ function validateCommand(event)
 }
 </script>
  </head>
+
 </html>
