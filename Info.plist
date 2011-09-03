@@ -21,6 +21,8 @@
 		<key>Toolbar Items</key>
 		<array>
 			<dict>
+				<key>Command</key>
+				<string>weiboButtonAction</string>
 				<key>Identifier</key>
 				<string>weibobutton</string>
 				<key>Image</key>
@@ -37,10 +39,19 @@
 	<key>Content</key>
 	<dict>
 		<key>Scripts</key>
-		<dict/>
+		<dict>
+			<key>End</key>
+			<array>
+				<string>jquery-1.6.2.min.js</string>
+			</array>
+		</dict>
+		<key>Stylesheets</key>
+		<array>
+			<string>styles.css</string>
+		</array>
 	</dict>
 	<key>Description</key>
-	<string>safari版新浪微薄工具</string>
+	<string>safari版新浪微博工具</string>
 	<key>ExtensionInfoDictionaryVersion</key>
 	<string>1.0</string>
 	<key>Permissions</key>
