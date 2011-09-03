@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>sunxiang0918</string>
+	<key>Builder Version</key>
+	<string>7534.48.3</string>
+	<key>CFBundleDisplayName</key>
+	<string>safariweibotool</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.gmail.sunxiang0918.safariweibotool</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>Chrome</key>
+	<dict>
+		<key>Toolbar Items</key>
+		<array>
+			<dict>
+				<key>Identifier</key>
+				<string>weibobutton</string>
+				<key>Image</key>
+				<string>logo.png</string>
+				<key>Label</key>
+				<string>weibobutton</string>
+				<key>Palette Label</key>
+				<string>weibobutton</string>
+				<key>Tool Tip</key>
+				<string>新浪微薄safari</string>
+			</dict>
+		</array>
+	</dict>
+	<key>Content</key>
+	<dict>
+		<key>Scripts</key>
+		<dict/>
+	</dict>
+	<key>Description</key>
+	<string>safari版新浪微薄工具</string>
+	<key>ExtensionInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>Permissions</key>
+	<dict>
+		<key>Website Access</key>
+		<dict>
+			<key>Include Secure Pages</key>
+			<true/>
+			<key>Level</key>
+			<string>All</string>
+		</dict>
+	</dict>
+</dict>
+</plist>
