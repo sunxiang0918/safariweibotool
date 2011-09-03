@@ -20,33 +20,33 @@ function launchSinaWeiBo(event)
 	var thisTabUrl = safari.application.activeBrowserWindow.activeTab.url;		//获取当前页面的URL
 	 
 	 /*验证当前页面是否已经是新浪微博的页面了*/
-	 if (thisTabUrl && thisTabUrl.match(/^http?:\/\/(.+\.)?weibo.com\.(.+)\/?/)) {
+	 if (thisTabUrl && thisTabUrl.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/?/)) {
         safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/";
         return;
     }
 
-	/*查找已经打开的页面
+	/*验证已经打开的页面*/
 	 if (safari.extension.settings.getItem("useExisting")) {
         var windowTabs = safari.application.activeBrowserWindow.tabs;
         for (var i=0; i<windowTabs.length; i++) {
-            if (windowTabs[i].url && windowTabs[i].url.match(/^https?:\/\/(.+\.)?google\.(.+)\/reader\/view(\/.+)?/)) {
+            if (windowTabs[i].url && windowTabs[i].url.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/(\/.+)?/)) {
                 windowTabs[i].activate();
-                if (reload) { safari.application.activeBrowserWindow.activeTab.url = (useSSL ? 'https' : 'http') + "://www.google.com/reader/"; }
+                if (reload) { safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/"; }
                 return;
             }
         }
         var allWindows = safari.application.browserWindows;
         for (var i=0; i<allWindows.length; i++) {
             for (var j=0; j<allWindows[i].tabs.length; j++) {
-                if (allWindows[i].tabs[j].url && allWindows[i].tabs[j].url.match(/^https?:\/\/(.+\.)?google\.(.+)\/reader\/view(\/.+)?/)) {
+                if (allWindows[i].tabs[j].url && allWindows[i].tabs[j].url.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/(\/.+)?/)) {
                     allWindows[i].tabs[j].activate();
                     allWindows[i].activate();
-                    if (reload) { safari.application.activeBrowserWindow.activeTab.url = (useSSL ? 'https' : 'http') + "://www.google.com/reader/"; }
+                    if (reload) { safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/"; }
                     return;
                 }
             }
         }
-    }*/
+    }
 
 	if (safari.application.activeBrowserWindow.activeTab.url) {
         var newTab = safari.application.activeBrowserWindow.openTab();
