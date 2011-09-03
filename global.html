@@ -3,11 +3,20 @@
   <head>
     <meta charset='utf-8' />
     <title>Sina WeiBo Button</title>
+    <!--导入jquery-->
+    <script src="jquery-1.6.2.min.js"></script>
 <script>
 safari.application.addEventListener("command", launchSinaWeiBo, false);
 safari.application.addEventListener("message",respondToMessage,false);
 safari.application.addEventListener("validate", loadPrefs, false);
 //safari.application.addEventListener("validate", validateCommand, false);
+
+var appId="3192287051";
+
+var unread = -1;			//未读数目
+var updater = null;		//循环更新器
+var includedItems = "all";		//检测的类型
+var lastCheck;		//最后一次检测的时间
 
 function launchSinaWeiBo(event)
 {
@@ -64,6 +73,57 @@ function launchSinaWeiBo(event)
 function getUnreadCount(){
 
 }
+
+function loadPrefs()
+{
+    includedItems = safari.extension.settings.getItem("includedItems");		//获取数量的种类,
+    var checkInterval = safari.extension.settings.getItem("checkInterval");		//查询的间隔时间
+
+    if (checkInterval != -1) {
+        var now = new Date().getTime();	//现在
+        if (!lastCheck || now >= (lastCheck + checkInterval*60*1000)) {		//时间转换为毫秒,并且验证检查时间
+            lastCheck = now;
+            setRefresh(checkInterval);
+        } else {
+            var buttons = safari.extension.toolbarItems;
+            for (var i=0; i<buttons.length; i++) {
+                buttons[i].badge = unread;		//设置未读数目
+            }
+        }
+    }
+}
+
+/*重读未读条目*/
+function setRefresh(minutes) {
+    if (minutes && !isNaN(minutes)) {
+        getUnreadCount();
+        clearInterval(updater);
+        updater = setInterval("getUnreadCount();", (minutes*60*1000));
+    } else {
+        clearInterval(updater);
+        updater = null;
+    }
+}
+
+/*读取未读的数量*/
+function getUnreadCount()
+{
+    $.ajax({
+		url: "http://api.t.sina.com.cn/statuses/unread.json",
+		data:{ source: appId},
+		dataType:"json",
+		success: function(data, textStatus){
+			alert(data);
+		},
+		complete: function(XMLHttpRequest, textStatus){
+			alert("in complete");
+		},
+		error: function(){
+			alert("in error");
+		}
+	});
+}
+
 
 function validateCommand(event)
 {

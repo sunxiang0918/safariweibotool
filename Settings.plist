@@ -12,5 +12,37 @@
 		<key>Type</key>
 		<string>CheckBox</string>
 	</dict>
+	<dict>
+		<key>DefaultValue</key>
+		<real>2</real>
+		<key>Key</key>
+		<string>checkInterval</string>
+		<key>Title</key>
+		<string>查询间隔时间</string>
+		<key>Titles</key>
+		<array>
+			<string>1分钟</string>
+			<string>2分钟</string>
+			<string>5分钟</string>
+			<string>10分钟</string>
+			<string>20分钟</string>
+			<string>30分钟</string>
+			<string>45分钟</string>
+			<string>60分钟</string>
+		</array>
+		<key>Type</key>
+		<string>ListBox</string>
+		<key>Values</key>
+		<array>
+			<real>1</real>
+			<real>2</real>
+			<real>5</real>
+			<real>10</real>
+			<real>20</real>
+			<real>30</real>
+			<real>45</real>
+			<real>60</real>
+		</array>
+	</dict>
 </array>
 </plist>
