@@ -44,5 +44,35 @@
 			<real>60</real>
 		</array>
 	</dict>
+	<dict>
+		<key>Type</key>
+		<string>Separator</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>oauth_verifier</string>
+		<key>Password</key>
+		<true/>
+		<key>Title</key>
+		<string>应用授权号码</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>oauth_token</string>
+		<key>Title</key>
+		<string>oauth_token</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
+	<dict>
+		<key>Key</key>
+		<string>oauth_token_secret</string>
+		<key>Title</key>
+		<string>oauth_token_secret</string>
+		<key>Type</key>
+		<string>TextField</string>
+	</dict>
 </array>
 </plist>

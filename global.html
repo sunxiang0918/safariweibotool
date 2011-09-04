@@ -11,13 +11,18 @@
 safari.application.addEventListener("command", launchSinaWeiBo, false);
 //safari.application.addEventListener("validate", loadPrefs, false);
 
-
 var appId="3192287051";
 
 var unread = -1;			//未读数目
 var updater = null;		//循环更新器
 var includedItems = "all";		//检测的类型
 var lastCheck;		//最后一次检测的时间
+
+var oauth_consumer_key="3192287051";
+var app_secret ="4346503e1d8ff6ff21288ee2848a5b24";
+var oauth_signature_method="HMAC-SHA1";
+var oauth_version="1.0";
+var oauth_method="GET";
 
 function launchSinaWeiBo(event)
 {
@@ -139,16 +144,9 @@ function getUnreadCount()
 
 function oauthValidate()
 {
-
-	var oauth_consumer_key="3192287051";
-	var app_secret ="4346503e1d8ff6ff21288ee2848a5b24";
 	var oauth_nonce=nonce(43);		//获取随机数
 	var oauth_timestamp=timestamp();
-	var oauth_signature_method="HMAC-SHA1";
-	var oauth_version="1.0";
 	var request_token_api="http://api.t.sina.com.cn/oauth/request_token";
-	var oauth_method="GET";
-	
 	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
                     "oauth_nonce=" + oauth_nonce,
                     "oauth_signature_method=" + oauth_signature_method,
@@ -156,18 +154,25 @@ function oauthValidate()
                     "oauth_version=" + oauth_version];
     var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
     var oauth_signature = b64_hmac_sha1(app_secret + "&", base_string) + "=";
-        
-     var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
+    
+    var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
                    + "&oauth_nonce=" + encodeURIComponent(oauth_nonce)
                    + "&oauth_timestamp=" + encodeURIComponent(oauth_timestamp)
                    + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
                    + "&oauth_signature=" + encodeURIComponent(oauth_signature)
                    + "&oauth_version=" + encodeURIComponent(oauth_version);
- 	
 	$.get('http://api.t.sina.com.cn/oauth/request_token?'+args, function(data) {
 			var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
 		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
-	}).error(function(data) { alert("error:"+data.responseText); });
+			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
+	}).error(function(data) { alert("first error:"+data); });
+}
+
+function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
+		safari.extension.settings.oauth_token=oauth_token;
+		safari.extension.settings.oauth_token_secret=oauth_token_secret;
+		var newTab = safari.application.activeBrowserWindow.openTab();
+		newTab.url='http://api.t.sina.com.cn/oauth/authorize?oauth_token='+oauth_token;
 }
 
 /*解析GET变量形式的值*/
