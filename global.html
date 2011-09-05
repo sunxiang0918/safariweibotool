@@ -26,7 +26,11 @@ var oauth_method="GET";
 
 function launchSinaWeiBo(event)
 {
-	oauthValidate();
+	if (safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""){
+		getOauthValidateRequestToken();
+	}else{
+		getOauthValidateAccessToken	();
+	}
 	 var reload = false;
 	 
 	 if (safari.extension.toolbarItems[0].image == safari.extension.baseURI+"error.png") {
@@ -142,7 +146,7 @@ function getUnreadCount()
 	});*/
 }
 
-function oauthValidate()
+function getOauthValidateRequestToken()
 {
 	var oauth_nonce=nonce(43);		//获取随机数
 	var oauth_timestamp=timestamp();
@@ -161,11 +165,32 @@ function oauthValidate()
                    + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
                    + "&oauth_signature=" + encodeURIComponent(oauth_signature)
                    + "&oauth_version=" + encodeURIComponent(oauth_version);
+	
+	$.ajax( {
+         url : request_token_api, type : 'GET',
+		 data: {  oauth_consumer_key : oauth_consumer_key,
+		 			oauth_nonce : oauth_nonce,
+		 			oauth_timestamp : oauth_timestamp,
+		 			oauth_signature_method :  oauth_signature_method,
+		 			oauth_signature : oauth_signature,
+				 	oauth_version : oauth_version}, 
+		 success : function(data) {
+			alert("data!:"+data); 
+          	var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
+		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
+			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
+		 },
+		error : function(f, e, g) {
+			alert("error:"+f.responseText);
+		}
+     });
+	/*
 	$.get('http://api.t.sina.com.cn/oauth/request_token?'+args, function(data) {
 			var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
 		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
 			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
 	}).error(function(data) { alert("first error:"+data); });
+	*/
 }
 
 function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
@@ -173,6 +198,59 @@ function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
 		safari.extension.settings.oauth_token_secret=oauth_token_secret;
 		var newTab = safari.application.activeBrowserWindow.openTab();
 		newTab.url='http://api.t.sina.com.cn/oauth/authorize?oauth_token='+oauth_token;
+}
+
+function getOauthValidateAccessToken(){
+	var oauth_nonce=nonce(43);		//获取随机数
+	var oauth_timestamp=timestamp();
+	var request_token_api="http://api.t.sina.com.cn/oauth/access_token";
+	var oauth_verifier=safari.extension.settings.oauth_verifier;
+	var oauth_token=safari.extension.settings.oauth_token;
+	var oauth_token_secret=safari.extension.settings.oauth_token_secret;
+	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
+                    "oauth_nonce=" + oauth_nonce,
+                    "oauth_signature_method=" + oauth_signature_method,
+					"oauth_token="+oauth_token,
+                    "oauth_timestamp=" + oauth_timestamp,
+					"oauth_verifier="+oauth_verifier,
+                    "oauth_version=" + oauth_version];
+    var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
+    var oauth_signature = b64_hmac_sha1(app_secret + "&"+oauth_token_secret, base_string) + "=";
+
+     var temp="POST&https%3A%2F%2Fapi.t.sina.com.cn%2Foauth%2Faccess_token&oauth_consumer_key%3DGDdmIQH6jhtmLUypg82g%26oauth_nonce%3D9zWH6qe0qG7Lc1telCn7FhUbLyVdjEaL3MO5uHxn8%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1272323047%26oauth_token%3D8ldIZyxQeVrFZXFOZH5tAwj6vzJYuLQpl0WUEYtWc%26oauth_verifier%3DpDNg57prOHapMbhv25RNf75lVRd6JDsni1AJJIDYoTY%26oauth_version%3D1.0";
+	 
+	 alert("example:"+b64_hmac_sha1("MCD8BKwGdgPHvAuvgvz4EQpqDAtx89grbuNMRd7Eh98&x6qpRnlEmW9JbQn4PQVVeVG8ZLPEx6A0TOebgwcuA", temp) + "=");
+
+	 var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
+                   + "&oauth_nonce=" + encodeURIComponent(oauth_nonce)
+                   + "&oauth_timestamp=" + encodeURIComponent(oauth_timestamp)
+                   + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
+                   + "&oauth_signature=" + encodeURIComponent(oauth_signature)
+                   + "&oauth_version=" + encodeURIComponent(oauth_version)
+				   + "&oauth_verifier=" + encodeURIComponent(oauth_verifier)
+				   + "&oauth_token=" + encodeURIComponent(oauth_token);
+	alert('http://api.t.sina.com.cn/oauth/access_token?'+args);
+	$.get('http://api.t.sina.com.cn/oauth/access_token?'+args, function(data) {
+			alert("success:"+data);
+	}).error(function(data) { alert("error:"+decodeURIComponent(data.responseText)); });
+	/*
+	$.ajax( {
+         url : 'http://api.t.sina.com.cn/oauth/access_token', type : 'GET',
+		 data: {  oauth_consumer_key : oauth_consumer_key,
+		 			oauth_nonce : oauth_nonce,
+		 			oauth_timestamp : oauth_timestamp,
+		 			oauth_signature_method :  oauth_signature_method,
+					oauth_verifier :oauth_verifier,
+					oauth_token :oauth_token,
+		 			oauth_signature : oauth_signature,
+				 	oauth_version : oauth_version}, 
+		 success : function(data) {
+			 alert("data:"+data);
+		 },
+		error : function(f, e, g) {
+			alert("error:"+decodeURIComponent(f.responseText))
+		}
+     });*/
 }
 
 /*解析GET变量形式的值*/
