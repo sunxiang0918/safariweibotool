@@ -26,15 +26,15 @@ var oauth_method="GET";
 
 function launchSinaWeiBo(event)
 {
-	if (safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""){
-		getOauthValidateRequestToken();
-	}else{
-		getOauthValidateAccessToken	();
-	}
 	 var reload = false;
 	 
 	 if (safari.extension.toolbarItems[0].image == safari.extension.baseURI+"error.png") {
         reload = true;
+		if (safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""){
+			getOauthValidateRequestToken();
+		}else{
+			getOauthValidateAccessToken	();
+		}
     }
 	
 	var thisTabUrl = safari.application.activeBrowserWindow.activeTab.url;		//获取当前页面的URL
@@ -81,10 +81,6 @@ function launchSinaWeiBo(event)
 	//alert("hello");
 }
 
-function getUnreadCount(){
-
-}
-
 function loadPrefs()
 {
     //includedItems = safari.extension.settings.getItem("includedItems");		//获取数量的种类,
@@ -119,7 +115,11 @@ function setRefresh(minutes) {
 /*读取未读的数量*/
 function getUnreadCount()
 {
-	/*
+	if(safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""||safari.extension.settings.access_token==null||safari.extension.settings.access_token==""){
+			setButtonError();
+			return;
+	}
+	
     $.ajax({
 		url: "http://api.t.sina.com.cn/statuses/unread.json",
 		data:{ source: appId},
@@ -128,8 +128,15 @@ function getUnreadCount()
 			alert(data);
 		},
 		error: function(XMLHttpRequest, textStatus){
-			
-				// 错误,通常是因为没有登陆
+				setButtonError();
+			//alert(XMLHttpRequest.status);			//错误代码
+			//alert(XMLHttpRequest.responseText);		//JSON格式的错误信息 比如 {"request":"/statuses/unread.json","error_code":"403","error":"40302:Error: auth faild!"}
+		}
+	});
+}
+
+function setButtonError(){
+	// 错误,通常是因为没有登陆
                 unread = 0;
                 var buttons = safari.extension.toolbarItems;
                 for (var i=0; i<buttons.length; i++) {
@@ -137,15 +144,9 @@ function getUnreadCount()
                     buttons[i].image = safari.extension.baseURI+"error.png";
                     buttons[i].toolTip = "获取微博数目错误,有可能是没有登陆造成的,单击按钮登陆";
                 }
-			
-			//alert("in error");
-			//alert(XMLHttpRequest.readyState);
-			//alert(XMLHttpRequest.status);			//错误代码
-			alert(XMLHttpRequest.responseText);		//JSON格式的错误信息 比如 {"request":"/statuses/unread.json","error_code":"403","error":"40302:Error: auth faild!"}
-		}
-	});*/
 }
 
+/*授权第一步,获取requestToken*/
 function getOauthValidateRequestToken()
 {
 	var oauth_nonce=nonce(43);		//获取随机数
@@ -158,13 +159,6 @@ function getOauthValidateRequestToken()
                     "oauth_version=" + oauth_version];
     var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
     var oauth_signature = b64_hmac_sha1(app_secret + "&", base_string) + "=";
-    
-    var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
-                   + "&oauth_nonce=" + encodeURIComponent(oauth_nonce)
-                   + "&oauth_timestamp=" + encodeURIComponent(oauth_timestamp)
-                   + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
-                   + "&oauth_signature=" + encodeURIComponent(oauth_signature)
-                   + "&oauth_version=" + encodeURIComponent(oauth_version);
 	
 	$.ajax( {
          url : request_token_api, type : 'GET',
@@ -175,24 +169,18 @@ function getOauthValidateRequestToken()
 		 			oauth_signature : oauth_signature,
 				 	oauth_version : oauth_version}, 
 		 success : function(data) {
-			alert("data!:"+data); 
           	var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
 		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
 			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
 		 },
 		error : function(f, e, g) {
-			alert("error:"+f.responseText);
+			alert("error:"+decodeURIComponent(f.responseText));
 		}
      });
-	/*
-	$.get('http://api.t.sina.com.cn/oauth/request_token?'+args, function(data) {
-			var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
-		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
-			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
-	}).error(function(data) { alert("first error:"+data); });
-	*/
+
 }
 
+/*打开用户授权页面,用户获取PIN码*/
 function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
 		safari.extension.settings.oauth_token=oauth_token;
 		safari.extension.settings.oauth_token_secret=oauth_token_secret;
@@ -200,6 +188,7 @@ function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
 		newTab.url='http://api.t.sina.com.cn/oauth/authorize?oauth_token='+oauth_token;
 }
 
+/*获取用户授权后的 access_token和 access_token_secret*/
 function getOauthValidateAccessToken(){
 	var oauth_nonce=nonce(43);		//获取随机数
 	var oauth_timestamp=timestamp();
@@ -216,20 +205,7 @@ function getOauthValidateAccessToken(){
                     "oauth_version=" + oauth_version];
     var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
     var oauth_signature = b64_hmac_sha1(app_secret + "&"+oauth_token_secret, base_string) + "=";
-
-	var args = "oauth_consumer_key=" + encodeURIComponent(oauth_consumer_key)
-                   + "&oauth_nonce=" + encodeURIComponent(oauth_nonce)
-                   + "&oauth_timestamp=" + encodeURIComponent(oauth_timestamp)
-                   + "&oauth_signature_method=" + encodeURIComponent(oauth_signature_method)
-                   + "&oauth_signature=" + encodeURIComponent(oauth_signature)
-                   + "&oauth_version=" + encodeURIComponent(oauth_version)
-				   + "&oauth_verifier=" + encodeURIComponent(oauth_verifier)
-				   + "&oauth_token=" + encodeURIComponent(oauth_token);
-	alert('http://api.t.sina.com.cn/oauth/access_token?'+args);
-	$.get('http://api.t.sina.com.cn/oauth/access_token?'+args, function(data) {
-			alert("success:"+data);
-	}).error(function(data) { alert("error:"+decodeURIComponent(data.responseText)); });
-	/*
+	
 	$.ajax( {
          url : 'http://api.t.sina.com.cn/oauth/access_token', type : 'GET',
 		 data: {  oauth_consumer_key : oauth_consumer_key,
@@ -241,12 +217,14 @@ function getOauthValidateAccessToken(){
 		 			oauth_signature : oauth_signature,
 				 	oauth_version : oauth_version}, 
 		 success : function(data) {
-			 alert("data:"+data);
+			 safari.extension.settings.access_token=getParameter("oauth_token",data);			//获取oauth_token
+		     safari.extension.settings.access_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
 		 },
 		error : function(f, e, g) {
-			alert("error:"+decodeURIComponent(f.responseText))
+			alert("error:"+decodeURIComponent(f.responseText));
+			//TODO 这个地方需要处理验证失败后清除access_token access_token_secret
 		}
-     });*/
+     });
 }
 
 /*解析GET变量形式的值*/
