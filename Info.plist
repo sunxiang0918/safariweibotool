@@ -20,6 +20,60 @@
 	<dict>
 		<key>Global Page</key>
 		<string>global.html</string>
+		<key>Menus</key>
+		<array>
+			<dict>
+				<key>Identifier</key>
+				<string>unReadMenu</string>
+				<key>Menu Items</key>
+				<array>
+					<dict>
+						<key>Command</key>
+						<string>commentsMenuAction</string>
+						<key>Identifier</key>
+						<string>commentsMenu</string>
+						<key>Title</key>
+						<string>新评论数:0</string>
+					</dict>
+					<dict>
+						<key>Command</key>
+						<string>dmMenuAction</string>
+						<key>Identifier</key>
+						<string>dmMenu</string>
+						<key>Title</key>
+						<string>新私信数:0</string>
+					</dict>
+					<dict>
+						<key>Command</key>
+						<string>followersMenuAction</string>
+						<key>Identifier</key>
+						<string>followersMenu</string>
+						<key>Title</key>
+						<string>新粉丝数:0</string>
+					</dict>
+					<dict>
+						<key>Command</key>
+						<string>mentionsMenu</string>
+						<key>Identifier</key>
+						<string>mentionsMenu</string>
+						<key>Title</key>
+						<string>新@我数:0</string>
+					</dict>
+					<dict>
+						<key>Separator</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>Command</key>
+						<string>openWeiBoMenuAction</string>
+						<key>Identifier</key>
+						<string>openWeiBoMenu</string>
+						<key>Title</key>
+						<string>打开我的微博</string>
+					</dict>
+				</array>
+			</dict>
+		</array>
 		<key>Toolbar Items</key>
 		<array>
 			<dict>
@@ -31,6 +85,8 @@
 				<string>logo.png</string>
 				<key>Label</key>
 				<string>weibobutton</string>
+				<key>Menu</key>
+				<string>unReadMenu</string>
 				<key>Palette Label</key>
 				<string>weibobutton</string>
 				<key>Tool Tip</key>
