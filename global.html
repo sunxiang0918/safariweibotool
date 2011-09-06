@@ -5,8 +5,8 @@
     <title>Sina WeiBo Button</title>
     <!--导入jquery-->
     <script src="jquery-1.6.2.min.js"></script>
-    <script src="oauth.js"></script>
 	<script src="sha1.js"></script>
+    <script src="util.js"></script>
 <script>
 safari.application.addEventListener("command", launchSinaWeiBo, false);
 safari.application.addEventListener("validate", loadPrefs, false);
@@ -166,8 +166,8 @@ function getUnreadCount()
 			return;
 	}
 	
-	var oauth_nonce=nonce(43);		//获取随机数
-	var oauth_timestamp=timestamp();
+	var oauth_nonce=Utils.nonce(43);		//获取随机数
+	var oauth_timestamp=Utils.timestamp();
 	var request_token_api="http://api.t.sina.com.cn/statuses/unread.json";
 	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
                     "oauth_nonce=" + oauth_nonce,
@@ -243,8 +243,8 @@ function setButtonRight(count){
 /*授权第一步,获取requestToken*/
 function getOauthValidateRequestToken()
 {
-	var oauth_nonce=nonce(43);		//获取随机数
-	var oauth_timestamp=timestamp();
+	var oauth_nonce=Utils.nonce(43);		//获取随机数
+	var oauth_timestamp=Utils.timestamp();
 	var request_token_api="http://api.t.sina.com.cn/oauth/request_token";
 	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
                     "oauth_nonce=" + oauth_nonce,
@@ -263,8 +263,8 @@ function getOauthValidateRequestToken()
 		 			oauth_signature : oauth_signature,
 				 	oauth_version : oauth_version}, 
 		 success : function(data) {
-          	var oauth_token=getParameter("oauth_token",data);			//获取oauth_token
-		    var oauth_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
+          	var oauth_token=Utils.getParameter("oauth_token",data);			//获取oauth_token
+		    var oauth_token_secret=Utils.getParameter("oauth_token_secret",data);		//获取oauth_token_secret
 			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
 		 },
 		error : function(f, e, g) {
@@ -284,8 +284,8 @@ function openOauthValidateUserLoginPage(oauth_token,oauth_token_secret){
 
 /*获取用户授权后的 access_token和 access_token_secret*/
 function getOauthValidateAccessToken(){
-	var oauth_nonce=nonce(43);		//获取随机数
-	var oauth_timestamp=timestamp();
+	var oauth_nonce=Utils.nonce(43);		//获取随机数
+	var oauth_timestamp=Utils.timestamp();
 	var request_token_api="http://api.t.sina.com.cn/oauth/access_token";
 	var oauth_verifier=safari.extension.settings.oauth_verifier;
 	var oauth_token=safari.extension.settings.oauth_token;
@@ -311,9 +311,9 @@ function getOauthValidateAccessToken(){
 		 			oauth_signature : oauth_signature,
 				 	oauth_version : oauth_version}, 
 		 success : function(data) {
-			 safari.extension.settings.access_token=getParameter("oauth_token",data);			//获取oauth_token
-		     safari.extension.settings.access_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
-			 safari.extension.settings.user_id=getParameter("user_id",data);			//获取用户ID
+			 safari.extension.settings.access_token=Utils.getParameter("oauth_token",data);			//获取oauth_token
+		     safari.extension.settings.access_token_secret=Utils.getParameter("oauth_token_secret",data);		//获取oauth_token_secret
+			 safari.extension.settings.user_id=Utils.getParameter("user_id",data);			//获取用户ID
 			 getUnreadCount();		//马上就再读一次
 		 },
 		error : function(f, e, g) {
@@ -322,33 +322,6 @@ function getOauthValidateAccessToken(){
 		}
      });
 }
-
-/*解析GET变量形式的值*/
-function getParameter( val ,data) {
-	var re = new RegExp (val + "=([^&#]*)","i")
-	var a = re.exec(data)
-	if ( a == null )
-		return null;
-	return decodeURI(a[1]);
-};
-
-/*随机生成字符串*/
-function nonce(length) {
-        var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
-        var result = "";
-        for (var i = 0; i < length; ++i) {
-            var rnum = Math.floor(Math.random() * chars.length);
-            result += chars.substring(rnum, rnum+1);
-        }
-        return result;
-}
-
-/*获取时间戳*/
-function timestamp() {
-        var t = (new Date()).getTime() ;
-        return Math.floor(t / 1000);
-}
-
 </script>
  </head>
 
