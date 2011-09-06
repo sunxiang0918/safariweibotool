@@ -55,6 +55,23 @@ function launchSinaWeiBo(event)
 	
 }
 
+function openMenuAction(menuName,parame){
+	var menuItem=Utils.getMenuItem(menuName);
+		if(menuItem!=null){
+			var title=menuItem.title;
+			var count=parseInt(title.split(":")[1]);
+			unread=unread-count;
+			menuItem.title=menuItem.title.split(":")[0]+":0";
+			setButtonRight(unread);
+			var url="http://weibo.com/";
+			if(parame!=null){
+				url=url+parame+"/";
+			}
+			url=url+menuName;
+			doOpenMyWeiboAction(url,true);
+		}
+}
+
 /*打开微博的首页*/
 function doOpenMyWeiboAction(url,needreload){
 		
@@ -102,36 +119,10 @@ function doOpenMyWeiboAction(url,needreload){
 	setButtonRight(0);		//清空数目
 }
 
-function openMenuAction(menuName,parame){
-	var menuItem=getMenuItem(menuName);
-		if(menuItem!=null){
-			var title=menuItem.title;
-			var count=parseInt(title.split(":")[1]);
-			unread=unread-count;
-			menuItem.title=menuItem.title.split(":")[0]+":0";
-			setButtonRight(unread);
-			var url="http://weibo.com/";
-			if(parame!=null){
-				url=url+parame+"/";
-			}
-			url=url+menuName;
-			doOpenMyWeiboAction(url,true);
-		}
-}
-
-function getMenuItem(menuItemName){
-	var menu=safari.extension.toolbarItems[0].menu;
-	var menuItems = menu.menuItems;
-     for (var i=0; i<menuItems.length; i++) {
-		if(menuItems[i].identifier==menuItemName)	return menuItems[i];	
-      }
-	  return null;
-}
-
+/*每隔一段时间检测数目*/
 function loadPrefs()
 {
     var checkInterval = safari.extension.settings.getItem("checkInterval");		//查询的间隔时间
-
     if (checkInterval != -1) {
         var now = new Date().getTime();	//现在
         if (!lastCheck || now >= (lastCheck + checkInterval*60*1000)) {		//时间转换为毫秒,并且验证检查时间
@@ -161,9 +152,10 @@ function setRefresh(minutes) {
 /*读取未读的数量*/
 function getUnreadCount()
 {
+	/*如果用户的部分数据有问题,表示登陆错误*/
 	if(safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""||safari.extension.settings.access_token==null||safari.extension.settings.access_token==""){
-			setButtonError();
-			return;
+		setButtonError();
+		return;
 	}
 	
 	var oauth_nonce=Utils.nonce(43);		//获取随机数
@@ -207,7 +199,7 @@ function getUnreadCount()
 }
 
 function setMenuItemTitle(menuItemName,count){
-			var menuItem=getMenuItem(menuItemName);
+			var menuItem=Utils.getMenuItem(menuItemName);
 			if(menuItem!=null){
 				var title=menuItem.title;
 				menuItem.title=menuItem.title.split(":")[0]+":"+count;
@@ -223,6 +215,14 @@ function setButtonError(){
                     buttons[i].image = safari.extension.baseURI+"error.png";
                     buttons[i].toolTip = "获取微博数目错误,有可能是没有登陆造成的,单击按钮登陆";
                 }
+                /*清空存储的数据*/
+                safari.extension.settings.oauth_verifier=null;
+                safari.extension.settings.oauth_token=null;
+                safari.extension.settings.oauth_token_secret=null;
+                safari.extension.settings.access_token=null;
+                safari.extension.settings.access_token_secret=null;
+                safari.extension.settings.user_id=null;
+                
 }
 
 function setButtonRight(count){

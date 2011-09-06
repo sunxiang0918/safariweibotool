@@ -22,6 +22,15 @@ var Utils = {
 		/*获取时间戳*/
 		var t = (new Date()).getTime() ;
         return Math.floor(t / 1000);
+	},
+	getMenuItem:function(menuItemName){
+		/*根据名称,获取Menu对象*/
+		var menu=safari.extension.toolbarItems[0].menu;
+		var menuItems = menu.menuItems;
+     	for (var i=0; i<menuItems.length; i++) {
+			if(menuItems[i].identifier==menuItemName)	return menuItems[i];	
+      	}
+		return null;
 	}
 }
 
