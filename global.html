@@ -26,32 +26,55 @@ var oauth_method="GET";
 /*按钮的主响应方法*/
 function launchSinaWeiBo(event)
 {
-	 var reload = false;
-	 
+	 var needreload = false;
+	 /*判断按钮的状态,也就是图片*/
 	 if (safari.extension.toolbarItems[0].image == safari.extension.baseURI+"error.png") {
-        reload = true;
+		 /*如果是error,说明需要重新登陆验证*/
+        needreload = true;
 		if (safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""){
+			/*如果没有PIN码,需要请求request_token*/
 			getOauthValidateRequestToken();
 		}else{
+			/*如果已经有PIN码了,直接请求access*/
 			getOauthValidateAccessToken	();
 		}
     }
 	
+	if (event.command == "openWeiBoMenuAction"){
+		/*如果命令名字是openWeiBoMenuAction 则打开我的页面*/
+		doOpenMyWeiboAction("http://weibo.com/",needreload);
+	}else if(event.command == "commentsMenuAction"){
+		openMenuAction("comment",null);
+	}else if(event.command == "dmMenuAction"){
+		openMenuAction("messages",null);
+	}else if(event.command == "followersMenuAction"){
+		openMenuAction("fans",safari.extension.settings.user_id);
+	}else if(event.command == "mentionsMenuAction"){
+		openMenuAction("atme",null);
+	}
+	
+}
+
+/*打开微博的首页*/
+function doOpenMyWeiboAction(url,needreload){
+		
 	var thisTabUrl = safari.application.activeBrowserWindow.activeTab.url;		//获取当前页面的URL
 	 
 	 /*验证当前页面是否已经是新浪微博的页面了*/
 	 if (thisTabUrl && thisTabUrl.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/?/)) {
-        safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/";
+		 /*如果当前页面已经是在weibo上了,就直接重定向页面到微博首页,达到刷新的目的*/
+        safari.application.activeBrowserWindow.activeTab.url = url;
         return;
     }
 
 	/*验证已经打开的页面*/
 	 if (safari.extension.settings.getItem("useExisting")) {
+		 /*如果不需要每一次都打开新的页面,就需要获取所有的tab*/
         var windowTabs = safari.application.activeBrowserWindow.tabs;
         for (var i=0; i<windowTabs.length; i++) {
             if (windowTabs[i].url && windowTabs[i].url.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/(\/.+)?/)) {
                 windowTabs[i].activate();
-                if (reload) { safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/"; }
+                if (needreload) { safari.application.activeBrowserWindow.activeTab.url = url; }
                 return;
             }
         }
@@ -61,29 +84,52 @@ function launchSinaWeiBo(event)
                 if (allWindows[i].tabs[j].url && allWindows[i].tabs[j].url.match(/^http?:\/\/(.+\.)?weibo\.(.+)\/(\/.+)?/)) {
                     allWindows[i].tabs[j].activate();
                     allWindows[i].activate();
-                    if (reload) { safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/"; }
+                    if (needreload) { safari.application.activeBrowserWindow.activeTab.url = url; }
                     return;
                 }
             }
         }
     }
 
+    /*如果没有找到已打开的微博页面,就新建一个Tab然后打开*/
 	if (safari.application.activeBrowserWindow.activeTab.url) {
         var newTab = safari.application.activeBrowserWindow.openTab();
-        newTab.url = "http://weibo.com/";
+        newTab.url = url;
     } else {
-        safari.application.activeBrowserWindow.activeTab.url = "http://weibo.com/";
+        safari.application.activeBrowserWindow.activeTab.url = url;
     }
+	
+	setButtonRight(0);		//清空数目
+}
 
-	// You should always check the command.
-	//if (event.command != "weiboButtonAction")
-	//	return;
-	//alert("hello");
+function openMenuAction(menuName,parame){
+	var menuItem=getMenuItem(menuName);
+		if(menuItem!=null){
+			var title=menuItem.title;
+			var count=parseInt(title.split(":")[1]);
+			unread=unread-count;
+			menuItem.title=menuItem.title.split(":")[0]+":0";
+			setButtonRight(unread);
+			var url="http://weibo.com/";
+			if(parame!=null){
+				url=url+parame+"/";
+			}
+			url=url+menuName;
+			doOpenMyWeiboAction(url,true);
+		}
+}
+
+function getMenuItem(menuItemName){
+	var menu=safari.extension.toolbarItems[0].menu;
+	var menuItems = menu.menuItems;
+     for (var i=0; i<menuItems.length; i++) {
+		if(menuItems[i].identifier==menuItemName)	return menuItems[i];	
+      }
+	  return null;
 }
 
 function loadPrefs()
 {
-    //includedItems = safari.extension.settings.getItem("includedItems");		//获取数量的种类,
     var checkInterval = safari.extension.settings.getItem("checkInterval");		//查询的间隔时间
 
     if (checkInterval != -1) {
@@ -143,6 +189,12 @@ function getUnreadCount()
 				 	oauth_version : oauth_version}, 
 		 dataType:"json",
 		 success : function(data) {
+		
+			setMenuItemTitle("comment",data.comments);
+			setMenuItemTitle("fans",data.followers);
+			setMenuItemTitle("messages",data.dm);
+			setMenuItemTitle("atme",data.mentions);
+			 
 			 var count=parseInt(data.comments)+parseInt(data.followers)+parseInt(data.dm)+parseInt(data.mentions);
 			 setButtonRight(null);
 			 setButtonRight(count);
@@ -152,6 +204,14 @@ function getUnreadCount()
 			setButtonError();
 		}
      });
+}
+
+function setMenuItemTitle(menuItemName,count){
+			var menuItem=getMenuItem(menuItemName);
+			if(menuItem!=null){
+				var title=menuItem.title;
+				menuItem.title=menuItem.title.split(":")[0]+":"+count;
+			}	
 }
 
 function setButtonError(){
@@ -253,6 +313,7 @@ function getOauthValidateAccessToken(){
 		 success : function(data) {
 			 safari.extension.settings.access_token=getParameter("oauth_token",data);			//获取oauth_token
 		     safari.extension.settings.access_token_secret=getParameter("oauth_token_secret",data);		//获取oauth_token_secret
+			 safari.extension.settings.user_id=getParameter("user_id",data);			//获取用户ID
 			 getUnreadCount();		//马上就再读一次
 		 },
 		error : function(f, e, g) {

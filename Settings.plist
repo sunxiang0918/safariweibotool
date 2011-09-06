@@ -82,5 +82,9 @@
 		<key>Key</key>
 		<string>access_token_secret</string>
 	</dict>
+	<dict>
+		<key>Key</key>
+		<string>user_id</string>
+	</dict>
 </array>
 </plist>

@@ -31,7 +31,7 @@
 						<key>Command</key>
 						<string>commentsMenuAction</string>
 						<key>Identifier</key>
-						<string>commentsMenu</string>
+						<string>comment</string>
 						<key>Title</key>
 						<string>新评论数:0</string>
 					</dict>
@@ -39,7 +39,7 @@
 						<key>Command</key>
 						<string>dmMenuAction</string>
 						<key>Identifier</key>
-						<string>dmMenu</string>
+						<string>messages</string>
 						<key>Title</key>
 						<string>新私信数:0</string>
 					</dict>
@@ -47,15 +47,15 @@
 						<key>Command</key>
 						<string>followersMenuAction</string>
 						<key>Identifier</key>
-						<string>followersMenu</string>
+						<string>fans</string>
 						<key>Title</key>
 						<string>新粉丝数:0</string>
 					</dict>
 					<dict>
 						<key>Command</key>
-						<string>mentionsMenu</string>
+						<string>mentionsMenuAction</string>
 						<key>Identifier</key>
-						<string>mentionsMenu</string>
+						<string>atme</string>
 						<key>Title</key>
 						<string>新@我数:0</string>
 					</dict>
@@ -101,7 +101,6 @@
 			<key>Start</key>
 			<array>
 				<string>jquery-1.6.2.min.js</string>
-				<string>oauth.js</string>
 				<string>sha1.js</string>
 			</array>
 		</dict>
