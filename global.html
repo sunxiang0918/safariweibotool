@@ -40,7 +40,7 @@ function launchSinaWeiBo(event)
 		}
     }
 	
-	if (event.command == "openWeiBoMenuAction"){
+	if (event.command == "openWeiBoMenuAction"||(safari.extension.settings.clickIntoIndex==true&&event.command == "weiboButtonAction")){
 		/*如果命令名字是openWeiBoMenuAction 则打开我的页面*/
 		doOpenMyWeiboAction("http://weibo.com/",needreload);
 	}else if(event.command == "commentsMenuAction"){
@@ -155,8 +155,8 @@ function logout(){
 		 success : function(data) {
 			setButtonError();
 		 },
-		error : function(f, e, g) {
-			alert("error:"+decodeURIComponent(f.responseText));
+		error : function(data) {
+			alert("error:"+decodeURIComponent(data.responseText));
 			setButtonError();
 		}
      });
@@ -234,8 +234,8 @@ function getUnreadCount()
 			 setButtonRight(null);
 			 setButtonRight(count);
 		 },
-		error : function(f, e, g) {
-			alert("error:"+decodeURIComponent(f.responseText));
+		error : function(data) {
+			alert("error:"+decodeURIComponent(data.responseText));
 			setButtonError();
 		}
      });
@@ -310,8 +310,9 @@ function getOauthValidateRequestToken()
 		    var oauth_token_secret=Utils.getParameter("oauth_token_secret",data);		//获取oauth_token_secret
 			openOauthValidateUserLoginPage(oauth_token,oauth_token_secret);		//调用函数进行第二步用户授权的验证
 		 },
-		error : function(f, e, g) {
-			alert("error:"+decodeURIComponent(f.responseText));
+		error : function(data) {
+			alert("error:"+decodeURIComponent(data.responseText));
+			setButtonError();
 		}
      });
 
@@ -359,9 +360,9 @@ function getOauthValidateAccessToken(){
 			 safari.extension.settings.user_id=Utils.getParameter("user_id",data);			//获取用户ID
 			 getUnreadCount();		//马上就再读一次
 		 },
-		error : function(f, e, g) {
-			alert("error:"+decodeURIComponent(f.responseText));
-			//TODO 这个地方需要处理验证失败后清除access_token access_token_secret
+		error : function(data) {
+			alert("error:"+decodeURIComponent(data.responseText));
+			setButtonError();
 		}
      });
 }
