@@ -51,6 +51,9 @@ function launchSinaWeiBo(event)
 		openMenuAction("fans",safari.extension.settings.user_id);
 	}else if(event.command == "mentionsMenuAction"){
 		openMenuAction("atme",null);
+	}else if(event.command =="logoutMenuAction"){
+		/*登出*/
+		logout();	
 	}
 	
 }
@@ -117,6 +120,46 @@ function doOpenMyWeiboAction(url,needreload){
     }
 	
 	setButtonRight(0);		//清空数目
+}
+
+/*登出微博*/
+function logout(){
+	/*如果用户的部分数据有问题,表示登陆错误*/
+	if(safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""||safari.extension.settings.access_token==null||safari.extension.settings.access_token==""){
+		setButtonError();
+		return;
+	}
+	
+	var oauth_nonce=Utils.nonce(43);		//获取随机数
+	var oauth_timestamp=Utils.timestamp();
+	var request_token_api="http://api.t.sina.com.cn/account/end_session.json";
+	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
+                    "oauth_nonce=" + oauth_nonce,
+                    "oauth_signature_method=" + oauth_signature_method,
+                    "oauth_timestamp=" + oauth_timestamp,
+					"oauth_token="+safari.extension.settings.access_token,
+                    "oauth_version=" + oauth_version];
+    var base_string = oauth_method + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
+    var oauth_signature = b64_hmac_sha1(app_secret + "&"+safari.extension.settings.access_token_secret, base_string) + "=";
+	
+	$.ajax( {
+         url : request_token_api, type : 'GET',
+		 data: {  oauth_consumer_key : oauth_consumer_key,
+		 			oauth_nonce : oauth_nonce,
+		 			oauth_timestamp : oauth_timestamp,
+		 			oauth_signature_method :  oauth_signature_method,
+					oauth_token :safari.extension.settings.access_token,
+		 			oauth_signature : oauth_signature,
+				 	oauth_version : oauth_version}, 
+		 dataType:"json",
+		 success : function(data) {
+			setButtonError();
+		 },
+		error : function(f, e, g) {
+			alert("error:"+decodeURIComponent(f.responseText));
+			setButtonError();
+		}
+     });
 }
 
 /*每隔一段时间检测数目*/
@@ -322,6 +365,7 @@ function getOauthValidateAccessToken(){
 		}
      });
 }
+
 </script>
  </head>
 

@@ -71,6 +71,18 @@
 						<key>Title</key>
 						<string>打开我的微博</string>
 					</dict>
+					<dict>
+						<key>Separator</key>
+						<true/>
+					</dict>
+					<dict>
+						<key>Command</key>
+						<string>logoutMenuAction</string>
+						<key>Identifier</key>
+						<string>logout</string>
+						<key>Title</key>
+						<string>退出我的微博</string>
+					</dict>
 				</array>
 			</dict>
 		</array>
