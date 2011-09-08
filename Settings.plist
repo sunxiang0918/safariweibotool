@@ -14,16 +14,6 @@
 	</dict>
 	<dict>
 		<key>DefaultValue</key>
-		<false/>
-		<key>Key</key>
-		<string>clickIntoIndex</string>
-		<key>Title</key>
-		<string>单击图标进入主页</string>
-		<key>Type</key>
-		<string>CheckBox</string>
-	</dict>
-	<dict>
-		<key>DefaultValue</key>
 		<real>2</real>
 		<key>Key</key>
 		<string>checkInterval</string>
