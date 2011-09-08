@@ -7,9 +7,11 @@
     <script src="jquery-1.6.2.min.js"></script>
 	<script src="sha1.js"></script>
     <script src="util.js"></script>
+    <script src="punycode.js"></script>
 <script>
 safari.application.addEventListener("command", launchSinaWeiBo, false);
 safari.application.addEventListener("validate", loadPrefs, false);
+safari.application.addEventListener('beforeNavigate',pushWeiBoMessage, true);
 
 var appId="3192287051";
 var app_secret ="4346503e1d8ff6ff21288ee2848a5b24";
@@ -22,6 +24,76 @@ var oauth_consumer_key=appId;
 var oauth_signature_method="HMAC-SHA1";
 var oauth_version="1.0";
 var oauth_method="GET";
+
+function pushWeiBoMessage(event){
+	var url=event.url;
+	
+	if (! url) {
+       return;
+    }
+    
+    url = url.replace(/^\w{2,8}:\/\//, '').replace(/\/$/, '');
+   	
+	url = punycode.ToUnicode(unescape(url));		//转换为中文
+	
+	var regex   = /^([a-zA-Z0-9]+)\s+(.+)/,
+                matches = regex.exec(url),
+                exp, key, str;
+                
+    if (matches) {
+                key = matches[1];
+                str = matches[2];
+      if(key!="weibo")  return;
+      sendMessage(str);
+      event.preventDefault();
+    }  
+}
+
+function sendMessage(str){
+	/*如果用户的部分数据有问题,表示登陆错误*/
+	if(safari.extension.settings.oauth_verifier==null||safari.extension.settings.oauth_verifier==""||safari.extension.settings.access_token==null||safari.extension.settings.access_token==""){
+		//setButtonError();
+		return;
+	}
+	
+	var oauth_nonce=Utils.nonce(43);		//获取随机数
+	var oauth_timestamp=Utils.timestamp();
+	var request_token_api="http://api.t.sina.com.cn/statuses/update.json";
+	var param_arr = ["oauth_consumer_key=" + oauth_consumer_key,
+                    "oauth_nonce=" + oauth_nonce,
+                    "oauth_signature_method=" + oauth_signature_method,
+                    "oauth_timestamp=" + oauth_timestamp,
+					"oauth_token="+safari.extension.settings.access_token,
+                    "oauth_version=" + oauth_version,
+                    "source="+oauth_consumer_key,
+                    "status="+encodeURIComponent(str)];
+    var base_string = "POST" + "&" + encodeURIComponent(request_token_api) + "&" + encodeURIComponent(param_arr.join("&"));
+    alert("base_string:"+base_string);
+    var oauth_signature = b64_hmac_sha1(app_secret + "&"+safari.extension.settings.access_token_secret, base_string) + "=";
+		
+	$.ajax( {
+         url : request_token_api, type :'POST',
+		 data: {    status : str,
+		 			source:oauth_consumer_key,
+		 			oauth_consumer_key : oauth_consumer_key,
+		 			oauth_nonce : oauth_nonce,
+		 			oauth_timestamp : oauth_timestamp,
+		 			oauth_signature_method :  oauth_signature_method,
+					oauth_token :safari.extension.settings.access_token,
+		 			oauth_signature : oauth_signature,
+				 	oauth_version : oauth_version
+		 	   }, 
+		 dataType:"json",
+		 success : function(data) {
+			alert("发送微博成功!");
+		 },
+		error : function(data) {
+			alert("error:"+decodeURIComponent(data.responseText));
+		}
+     });
+    
+}
+
 
 /*按钮的主响应方法*/
 function launchSinaWeiBo(event)
@@ -236,7 +308,8 @@ function getUnreadCount()
 		 },
 		error : function(data) {
 			alert("error:"+decodeURIComponent(data.responseText));
-			setButtonError();
+			//错误了后,只有提示,不重新设置PIN码等
+			//setButtonError();
 		}
      });
 }
@@ -369,5 +442,6 @@ function getOauthValidateAccessToken(){
 
 </script>
  </head>
-
+<body>
+</body>
 </html>
