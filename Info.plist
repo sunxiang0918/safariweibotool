@@ -65,18 +65,6 @@
 					</dict>
 					<dict>
 						<key>Command</key>
-						<string>openWeiBoMenuAction</string>
-						<key>Identifier</key>
-						<string>openWeiBoMenu</string>
-						<key>Title</key>
-						<string>打开我的微博</string>
-					</dict>
-					<dict>
-						<key>Separator</key>
-						<true/>
-					</dict>
-					<dict>
-						<key>Command</key>
 						<string>logoutMenuAction</string>
 						<key>Identifier</key>
 						<string>logout</string>
@@ -137,5 +125,7 @@
 			<string>All</string>
 		</dict>
 	</dict>
+	<key>Website</key>
+	<string>http://users8.jabry.com/safariweibotool/</string>
 </dict>
 </plist>

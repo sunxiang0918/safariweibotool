@@ -255,7 +255,12 @@ function pushWeiBoMessage(event){
     
     url = url.replace(/^\w{2,8}:\/\//, '').replace(/\/$/, '');
    	
-	url = punycode.ToUnicode(unescape(url));		//转换为中文
+   	if(url.match("^"+"xn--")=="xn--"){
+   		/*由于safari很奇怪,字符长了,他的编码方式就会变…所以这个地方需要根据字符串的开头采用两种不同的方式解码*/
+   		url = punycode.ToUnicode(unescape(url));		//转换为中文
+   	}else{
+   		url = decodeURIComponent(url);
+   	}
 	
 	var regex   = /^([a-zA-Z0-9]+)\s+(.+)/,
                 matches = regex.exec(url),
@@ -276,7 +281,6 @@ function sendMessage(str){
 		//setButtonError();
 		return;
 	}
-	
 	var oauth_nonce=Utils.nonce(43);		//获取随机数
 	var oauth_timestamp=Utils.timestamp();
 	var request_token_api="http://api.t.sina.com.cn/statuses/update.json";
