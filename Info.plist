@@ -125,7 +125,9 @@
 			<string>All</string>
 		</dict>
 	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://sinasafaritool-bin.stor.sinaapp.com/update.plist</string>
 	<key>Website</key>
-	<string>http://users8.jabry.com/safariweibotool/</string>
+	<string>http://safariweibotool.s16.eatj.com/SafariWeiBoTool/</string>
 </dict>
 </plist>
